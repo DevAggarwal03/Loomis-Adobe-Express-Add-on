@@ -23,6 +23,7 @@ const SOURCE_MAP = {
   gifs: "tenor",
   illustrations: "unsplash",
   backgrounds: "unsplash",
+  background: "unsplash", // this caused the blank preview 
   images: "unsplash",
 };
 
