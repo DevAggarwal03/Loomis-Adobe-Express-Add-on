@@ -1,15 +1,17 @@
-// To support: system="express" scale="medium" color="light"
-// import these spectrum web components modules:
-import "@spectrum-web-components/theme/express/scale-medium.js";
-import "@spectrum-web-components/theme/express/theme-light.js";
-import "@spectrum-web-components/theme/scale-medium.js";
-import "@spectrum-web-components/theme/theme-light.js";
-
-// To learn more about using "spectrum web components" visit:
-// https://opensource.adobe.com/spectrum-web-components/
-import "@spectrum-web-components/button/sp-button.js";
+// Spectrum Web Components - Express Theme
+import "@spectrum-web-components/styles/typography.css";
 import "@spectrum-web-components/theme/sp-theme.js";
+import "@spectrum-web-components/theme/express/theme-light.js";
+import "@spectrum-web-components/theme/express/scale-medium.js";
+
+// Spectrum Components
+import "@spectrum-web-components/button/sp-button.js";
+import "@spectrum-web-components/action-button/sp-action-button.js";
 import "@spectrum-web-components/textfield/sp-textfield.js";
+import "@spectrum-web-components/search/sp-search.js";
+import "@spectrum-web-components/progress-circle/sp-progress-circle.js";
+import "@spectrum-web-components/divider/sp-divider.js";
+import "@spectrum-web-components/field-label/sp-field-label.js";
 
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
@@ -33,8 +35,7 @@ export class App extends LitElement {
   @state()
   _sandboxProxy;
 
-  // V5: View state machine
-  // 'welcome' | 'processing' | 'suggestions' | 'expanded'
+  // View state: 'welcome' | 'processing' | 'suggestions' | 'expanded'
   @state()
   _currentView = "welcome";
 
@@ -44,17 +45,14 @@ export class App extends LitElement {
   @state()
   _isProcessing = false;
 
-  // V5: Analysis result from Gemini
   @state()
-  _analysisResult = null; // { analysis_summary, suggestions }
+  _analysisResult = null;
 
-  // V5: Suggestions enriched with preview items
   @state()
   _enrichedSuggestions = [];
 
-  // V5: Expanded gallery state
   @state()
-  _expandedContext = null; // { segment_id, element_type, search_query, title }
+  _expandedContext = null;
 
   @state()
   _expandedResults = [];
@@ -68,11 +66,9 @@ export class App extends LitElement {
   @state()
   _expandedHasMore = false;
 
-  // V5: Inserting state
   @state()
   _insertingAssetId = null;
 
-  // Custom Tenor search state
   @state()
   _customSearchQuery = "";
 
@@ -85,7 +81,6 @@ export class App extends LitElement {
   @state()
   _customSearchError = "";
 
-  // User context/vision input for Gemini
   @state()
   _userContext = "";
 
@@ -94,16 +89,10 @@ export class App extends LitElement {
   }
 
   async firstUpdated() {
-    // Get the UI runtime.
     const { runtime } = this.addOnUISdk.instance;
-
-    // Get the proxy object for Document Sandbox runtime
     this._sandboxProxy = await runtime.apiProxy(RuntimeType.documentSandbox);
   }
 
-  /**
-   * Read file as base64 data URL
-   */
   _readFileAsBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -113,9 +102,6 @@ export class App extends LitElement {
     });
   }
 
-  /**
-   * Convert blob to base64 data URL
-   */
   _blobToBase64(blob) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -125,9 +111,6 @@ export class App extends LitElement {
     });
   }
 
-  /**
-   * Export current canvas as PNG blob
-   */
   async _exportCanvasAsPNG() {
     if (!this.addOnUISdk?.app?.document) {
       throw new Error("Add-on SDK not ready. Please try again.");
@@ -150,16 +133,10 @@ export class App extends LitElement {
     }
   }
 
-  /**
-   * Handle user context input change
-   */
   _handleContextInput(e) {
     this._userContext = e.target.value;
   }
 
-  /**
-   * Handle "Import from Device" button click
-   */
   _handleUploadButtonClick() {
     const fileInput = this.shadowRoot.querySelector("#file-input");
     if (fileInput) {
@@ -167,21 +144,16 @@ export class App extends LitElement {
     }
   }
 
-  /**
-   * Handle file upload and analysis
-   */
   async _handleFileUpload(e) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!validTypes.includes(file.type)) {
       this._errorMessage = "Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.";
       return;
     }
 
-    // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       this._errorMessage = "File size too large. Please upload an image under 10MB.";
       return;
@@ -193,13 +165,9 @@ export class App extends LitElement {
       "Analyzing image..."
     );
 
-    // Reset file input
     e.target.value = "";
   }
 
-  /**
-   * Handle "Scan my Canvas" button click
-   */
   async _handleScanFromCanvas() {
     await this._processImage(
       async () => {
@@ -211,9 +179,6 @@ export class App extends LitElement {
     );
   }
 
-  /**
-   * Process image through Gemini and fetch assets
-   */
   async _processImage(getBase64Fn, mimeType, loadingText) {
     this._currentView = "processing";
     this._errorMessage = "";
@@ -221,21 +186,14 @@ export class App extends LitElement {
     this._enrichedSuggestions = [];
 
     try {
-      // Get base64 image
       const base64Image = await getBase64Fn();
-
-      // Get user context (optional)
       const userContext = this._userContext.trim() || null;
-
-      // Analyze with Gemini V5, passing optional user context
       const result = await analyzeDesignV5(base64Image, mimeType, userContext);
       this._analysisResult = result;
 
-      // Fetch assets for all suggestions in parallel
       const enriched = await fetchAssetsForAllSuggestions(result.suggestions, 5);
       this._enrichedSuggestions = enriched;
 
-      // Transition to suggestions view
       this._currentView = "suggestions";
     } catch (error) {
       console.error("Processing error:", error);
@@ -244,9 +202,6 @@ export class App extends LitElement {
     }
   }
 
-  /**
-   * Handle "+ More" button click - expand gallery for a segment
-   */
   async _handleExpandGallery(suggestion) {
     this._expandedContext = {
       segment_id: suggestion.segment_id,
@@ -278,9 +233,6 @@ export class App extends LitElement {
     }
   }
 
-  /**
-   * Handle "Load More" in expanded gallery
-   */
   async _handleLoadMore() {
     if (!this._expandedContext || this._expandedLoading) return;
 
@@ -303,25 +255,16 @@ export class App extends LitElement {
     }
   }
 
-  /**
-   * Handle "Back" button in expanded view
-   */
   _handleBackToSuggestions() {
     this._currentView = "suggestions";
     this._expandedContext = null;
     this._expandedResults = [];
   }
 
-  /**
-   * Handle custom Tenor search input change
-   */
   _handleCustomSearchInput(e) {
     this._customSearchQuery = e.target.value;
   }
 
-  /**
-   * Handle custom Tenor search submission
-   */
   async _handleCustomSearch() {
     const query = this._customSearchQuery.trim();
     if (!query) return;
@@ -358,27 +301,18 @@ export class App extends LitElement {
     }
   }
 
-  /**
-   * Handle Enter key press in custom search input
-   */
   _handleCustomSearchKeypress(e) {
     if (e.key === "Enter") {
       this._handleCustomSearch();
     }
   }
 
-  /**
-   * Clear custom search results
-   */
   _clearCustomSearch() {
     this._customSearchQuery = "";
     this._customSearchResults = [];
     this._customSearchError = "";
   }
 
-  /**
-   * Insert asset to canvas based on type
-   */
   async _handleInsertAsset(asset) {
     if (!this.addOnUISdk?.app?.document) {
       this._errorMessage = "Add-on SDK not ready. Please try again.";
@@ -389,14 +323,11 @@ export class App extends LitElement {
     this._errorMessage = "";
 
     try {
-      const { source, add_to_canvas_action } = asset;
-      const actionType = add_to_canvas_action?.type;
+      const { source } = asset;
 
       if (source === "tenor") {
-        // Insert GIF/Meme (animated)
         await this._insertAnimatedImage(asset);
       } else if (source === "unsplash") {
-        // Insert static image
         await this._insertStaticImage(asset);
       }
     } catch (error) {
@@ -407,9 +338,6 @@ export class App extends LitElement {
     }
   }
 
-  /**
-   * Insert animated GIF from Tenor
-   */
   async _insertAnimatedImage(asset) {
     const gifUrl = asset.full_url || getGifUrl(asset._original);
 
@@ -439,9 +367,6 @@ export class App extends LitElement {
     );
   }
 
-  /**
-   * Insert static image from Unsplash
-   */
   async _insertStaticImage(asset) {
     const imageUrl = asset.full_url;
 
@@ -461,50 +386,36 @@ export class App extends LitElement {
       author: asset.metadata?.author || "Unsplash",
     });
 
-    // Track download for Unsplash attribution
     if (asset._original) {
       trackDownload(asset._original);
     }
   }
 
-  /**
-   * Render welcome state
-   */
   _renderWelcomeState() {
     return html`
       <div class="welcome-state">
         <div class="welcome-icon">✨</div>
-        <h3>Enhance Your Design</h3>
-        <p>
+        <p class="spectrum-Body spectrum-Body--sizeM">
           Upload an image or scan your canvas to get AI-powered suggestions
-          for backgrounds, GIFs, memes, illustrations, and images.
+          for backgrounds, GIFs, memes, and images.
         </p>
       </div>
     `;
   }
 
-  /**
-   * Render processing/loading state
-   */
   _renderProcessingState() {
     return html`
-      <div class="space-loader">
-        <div class="orbit">
-          <div class="planet"></div>
-          <div class="star star-1">✦</div>
-          <div class="star star-2">✧</div>
-          <div class="star star-3">✦</div>
-          <div class="star star-4">✧</div>
-          <div class="moon"></div>
-        </div>
-        <p class="loading-text">Analyzing your design...</p>
+      <div class="processing-state">
+        <sp-progress-circle
+          size="l"
+          indeterminate
+          label="Analyzing design..."
+        ></sp-progress-circle>
+        <p class="spectrum-Body spectrum-Body--sizeS processing-text">Analyzing your design...</p>
       </div>
     `;
   }
 
-  /**
-   * Render a single suggestion card
-   */
   _renderSuggestionCard(suggestion) {
     const icon = ELEMENT_ICONS[suggestion.element_type] || "📦";
     const hasItems = suggestion.preview_items && suggestion.preview_items.length > 0;
@@ -513,9 +424,9 @@ export class App extends LitElement {
       <div class="suggestion-card">
         <div class="card-header">
           <span class="card-icon">${icon}</span>
-          <h4 class="card-title">${suggestion.title}</h4>
+          <span class="spectrum-Heading spectrum-Heading--sizeXS card-title">${suggestion.title}</span>
         </div>
-        <p class="card-reason">${suggestion.reason}</p>
+        <p class="spectrum-Body spectrum-Body--sizeXS card-reason">${suggestion.reason}</p>
 
         ${hasItems
           ? html`
@@ -529,13 +440,15 @@ export class App extends LitElement {
                         class="gallery-thumbnail"
                         loading="lazy"
                       />
-                      <button
+                      <sp-action-button
+                        size="xs"
                         class="add-btn"
                         @click=${() => this._handleInsertAsset(item)}
                         ?disabled=${this._insertingAssetId !== null}
+                        quiet
                       >
                         ${this._insertingAssetId === item.id ? "..." : "+"}
-                      </button>
+                      </sp-action-button>
                     </div>
                   `
                 )}
@@ -543,7 +456,7 @@ export class App extends LitElement {
                   class="more-btn"
                   @click=${() => this._handleExpandGallery(suggestion)}
                 >
-                  <span class="more-icon">＋</span>
+                  <span class="more-icon">+</span>
                   <span class="more-text">More</span>
                 </button>
               </div>
@@ -551,56 +464,46 @@ export class App extends LitElement {
           : html`
               <div class="no-results">
                 ${suggestion.fetch_error
-                  ? html`<span class="error-text">Failed to load previews</span>`
-                  : html`<span>No previews available</span>`}
+                  ? html`<span class="error-text">Failed to load</span>`
+                  : html`<span>No previews</span>`}
               </div>
             `}
       </div>
     `;
   }
 
-  /**
-   * Render custom GIF search card
-   */
   _renderCustomSearchCard() {
     const hasResults = this._customSearchResults.length > 0;
 
     return html`
-      <div class="custom-search-card">
-        <div class="card-header">
-          <span class="card-icon">🔍</span>
-          <h4 class="card-title">Search GIFs & Memes</h4>
-        </div>
-        <p class="card-reason">
-          Looking for something specific? Search our library directly.
-        </p>
-
-        <div class="search-input-container">
-          <input
-            type="text"
-            class="custom-search-input"
-            placeholder="Try 'happy dance', 'thumbs up', 'excited'..."
+      <div class="search-card">
+        <div class="search-row">
+          <sp-search
+            size="m"
+            placeholder="Search GIFs..."
             .value=${this._customSearchQuery}
             @input=${this._handleCustomSearchInput}
             @keypress=${this._handleCustomSearchKeypress}
+            @submit=${(e) => { e.preventDefault(); this._handleCustomSearch(); }}
             ?disabled=${this._customSearchLoading}
-          />
-          <button
-            class="custom-search-btn"
+          ></sp-search>
+          <sp-button
+            size="m"
+            variant="accent"
             @click=${this._handleCustomSearch}
             ?disabled=${this._customSearchLoading || !this._customSearchQuery.trim()}
           >
-            ${this._customSearchLoading ? "..." : "Search"}
-          </button>
+            ${this._customSearchLoading ? "..." : "Go"}
+          </sp-button>
         </div>
 
         ${this._customSearchError
-          ? html`<div class="custom-search-error">${this._customSearchError}</div>`
+          ? html`<div class="search-error spectrum-Body spectrum-Body--sizeXS">${this._customSearchError}</div>`
           : ""}
 
         ${hasResults
           ? html`
-              <div class="custom-search-results">
+              <div class="search-results">
                 <div class="mini-gallery">
                   ${this._customSearchResults.map(
                     (item) => html`
@@ -611,20 +514,22 @@ export class App extends LitElement {
                           class="gallery-thumbnail"
                           loading="lazy"
                         />
-                        <button
+                        <sp-action-button
+                          size="xs"
                           class="add-btn"
                           @click=${() => this._handleInsertAsset(item)}
                           ?disabled=${this._insertingAssetId !== null}
+                          quiet
                         >
                           ${this._insertingAssetId === item.id ? "..." : "+"}
-                        </button>
+                        </sp-action-button>
                       </div>
                     `
                   )}
                 </div>
-                <button class="clear-search-btn" @click=${this._clearCustomSearch}>
-                  Clear Results
-                </button>
+                <sp-button size="s" variant="secondary" @click=${this._clearCustomSearch}>
+                  Clear
+                </sp-button>
               </div>
             `
           : ""}
@@ -632,9 +537,6 @@ export class App extends LitElement {
     `;
   }
 
-  /**
-   * Render suggestions view (main panel with all suggestion cards)
-   */
   _renderSuggestionsView() {
     return html`
       <div class="suggestions-container">
@@ -642,36 +544,45 @@ export class App extends LitElement {
           ${this._enrichedSuggestions.map((suggestion) =>
             this._renderSuggestionCard(suggestion)
           )}
-          ${this._renderCustomSearchCard()}
         </div>
 
-        <button class="rescan-btn" @click=${this._handleScanFromCanvas}>
+        <sp-divider size="s"></sp-divider>
+        
+        ${this._renderCustomSearchCard()}
+
+        <sp-button
+          size="m"
+          variant="secondary"
+          class="rescan-btn"
+          @click=${this._handleScanFromCanvas}
+        >
           🔄 Rescan Canvas
-        </button>
+        </sp-button>
       </div>
     `;
   }
 
-  /**
-   * Render expanded gallery view
-   */
   _renderExpandedView() {
     const icon = ELEMENT_ICONS[this._expandedContext?.element_type] || "📦";
 
     return html`
       <div class="expanded-container">
         <div class="expanded-header">
-          <button class="back-btn" @click=${this._handleBackToSuggestions}>
+          <sp-action-button size="s" @click=${this._handleBackToSuggestions}>
             ← Back
-          </button>
+          </sp-action-button>
           <div class="expanded-title">
             <span class="card-icon">${icon}</span>
-            <h4>${this._expandedContext?.title || "Gallery"}</h4>
+            <span class="spectrum-Heading spectrum-Heading--sizeXS">${this._expandedContext?.title || "Gallery"}</span>
           </div>
         </div>
 
         ${this._expandedLoading && this._expandedResults.length === 0
-          ? html`<div class="loading">Loading...</div>`
+          ? html`
+              <div class="loading-state">
+                <sp-progress-circle size="m" indeterminate></sp-progress-circle>
+              </div>
+            `
           : ""}
 
         <div class="expanded-grid">
@@ -686,12 +597,12 @@ export class App extends LitElement {
                 />
                 <sp-button
                   size="s"
-                  variant="primary"
+                  variant="accent"
                   @click=${() => this._handleInsertAsset(item)}
                   ?disabled=${this._insertingAssetId !== null}
                   class="expanded-add-btn"
                 >
-                  ${this._insertingAssetId === item.id ? "Adding..." : "Add"}
+                  ${this._insertingAssetId === item.id ? "..." : "Add"}
                 </sp-button>
               </div>
             `
@@ -700,14 +611,23 @@ export class App extends LitElement {
 
         ${this._expandedHasMore && !this._expandedLoading
           ? html`
-              <button class="load-more-btn" @click=${this._handleLoadMore}>
+              <sp-button
+                size="m"
+                variant="primary"
+                class="load-more-btn"
+                @click=${this._handleLoadMore}
+              >
                 Load More
-              </button>
+              </sp-button>
             `
           : ""}
 
         ${this._expandedLoading && this._expandedResults.length > 0
-          ? html`<div class="loading-more">Loading more...</div>`
+          ? html`
+              <div class="loading-more">
+                <sp-progress-circle size="s" indeterminate></sp-progress-circle>
+              </div>
+            `
           : ""}
       </div>
     `;
@@ -717,23 +637,20 @@ export class App extends LitElement {
     return html`
       <sp-theme system="express" color="light" scale="medium">
         <div class="container">
-          <!-- Header with upload controls (visible in welcome and suggestions views) -->
+          <!-- Header with upload controls -->
           ${this._currentView === "welcome" || this._currentView === "suggestions"
             ? html`
                 <div class="header-section">
-                  <h2 class="title">Loomis</h2>
+                  <h1 class="spectrum-Heading spectrum-Heading--sizeS title">Loomis</h1>
                   
-                  <!-- Context input field -->
-                  <div class="context-input-wrapper">
-                    <sp-textfield
-                      id="context-input"
-                      placeholder="What's the theme about?"
-                      .value=${this._userContext}
-                      @input=${this._handleContextInput}
-                      ?disabled=${this._currentView === "processing"}
-                      class="context-textfield"
-                    ></sp-textfield>
-                  </div>
+                  <sp-textfield
+                    size="m"
+                    placeholder="What's the theme about?"
+                    .value=${this._userContext}
+                    @input=${this._handleContextInput}
+                    ?disabled=${this._currentView === "processing"}
+                    class="context-field"
+                  ></sp-textfield>
 
                   <div class="upload-controls">
                     <input
@@ -743,19 +660,20 @@ export class App extends LitElement {
                       style="display: none;"
                       @change=${this._handleFileUpload}
                     />
-                    <button
-                      class="scan-button-ai ${this._isProcessing ? "processing" : ""}"
+                    <sp-button
+                      size="m"
+                      variant="accent"
                       @click=${this._handleScanFromCanvas}
                       ?disabled=${this._currentView === "processing"}
+                      class="scan-btn"
                     >
-                      <span class="scan-button-text">✨ Scan my Canvas</span>
-                    </button>
+                      ✨ Scan my Canvas
+                    </sp-button>
                     <sp-button
                       size="m"
                       variant="secondary"
                       @click=${this._handleUploadButtonClick}
                       ?disabled=${this._currentView === "processing"}
-                      class="upload-button"
                     >
                       Import from Device
                     </sp-button>
@@ -766,10 +684,10 @@ export class App extends LitElement {
 
           <!-- Error message -->
           ${this._errorMessage
-            ? html`<div class="error-message">${this._errorMessage}</div>`
+            ? html`<div class="error-message spectrum-Body spectrum-Body--sizeXS">${this._errorMessage}</div>`
             : ""}
 
-          <!-- Main content based on view state -->
+          <!-- Main content -->
           <div class="main-content">
             ${this._currentView === "welcome" ? this._renderWelcomeState() : ""}
             ${this._currentView === "processing" ? this._renderProcessingState() : ""}
