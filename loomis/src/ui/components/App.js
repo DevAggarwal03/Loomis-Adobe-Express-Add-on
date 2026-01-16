@@ -9,6 +9,7 @@ import "@spectrum-web-components/theme/theme-light.js";
 // https://opensource.adobe.com/spectrum-web-components/
 import "@spectrum-web-components/button/sp-button.js";
 import "@spectrum-web-components/theme/sp-theme.js";
+import "@spectrum-web-components/textfield/sp-textfield.js";
 
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
@@ -84,6 +85,10 @@ export class App extends LitElement {
   @state()
   _customSearchError = "";
 
+  // User context/vision input for Gemini
+  @state()
+  _userContext = "";
+
   static get styles() {
     return style;
   }
@@ -143,6 +148,13 @@ export class App extends LitElement {
       console.error("Canvas export error:", error);
       throw new Error(error.message || "Failed to export canvas. Please try again.");
     }
+  }
+
+  /**
+   * Handle user context input change
+   */
+  _handleContextInput(e) {
+    this._userContext = e.target.value;
   }
 
   /**
@@ -212,8 +224,11 @@ export class App extends LitElement {
       // Get base64 image
       const base64Image = await getBase64Fn();
 
-      // Analyze with Gemini V5
-      const result = await analyzeDesignV5(base64Image, mimeType);
+      // Get user context (optional)
+      const userContext = this._userContext.trim() || null;
+
+      // Analyze with Gemini V5, passing optional user context
+      const result = await analyzeDesignV5(base64Image, mimeType, userContext);
       this._analysisResult = result;
 
       // Fetch assets for all suggestions in parallel
@@ -621,25 +636,8 @@ export class App extends LitElement {
    * Render suggestions view (main panel with all suggestion cards)
    */
   _renderSuggestionsView() {
-    const summary = this._analysisResult?.analysis_summary;
-
     return html`
       <div class="suggestions-container">
-        ${summary
-          ? html`
-              <div class="analysis-summary">
-                <span class="theme-badge">${summary.theme}</span>
-                ${summary.missing_elements?.length > 0
-                  ? html`
-                      <span class="missing-hint">
-                        Missing: ${summary.missing_elements.slice(0, 2).join(", ")}
-                      </span>
-                    `
-                  : ""}
-              </div>
-            `
-          : ""}
-
         <div class="suggestions-list">
           ${this._enrichedSuggestions.map((suggestion) =>
             this._renderSuggestionCard(suggestion)
@@ -724,6 +722,19 @@ export class App extends LitElement {
             ? html`
                 <div class="header-section">
                   <h2 class="title">Loomis</h2>
+                  
+                  <!-- Context input field -->
+                  <div class="context-input-wrapper">
+                    <sp-textfield
+                      id="context-input"
+                      placeholder="What's the theme about?"
+                      .value=${this._userContext}
+                      @input=${this._handleContextInput}
+                      ?disabled=${this._currentView === "processing"}
+                      class="context-textfield"
+                    ></sp-textfield>
+                  </div>
+
                   <div class="upload-controls">
                     <input
                       type="file"

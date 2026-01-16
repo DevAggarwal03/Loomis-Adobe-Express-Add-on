@@ -5,9 +5,10 @@ import { GoogleGenAI } from "@google/genai";
  * Analyzes design and returns structured suggestions segmented by element type
  * @param {string} base64Image - Base64 encoded image data
  * @param {string} mimeType - MIME type of the image
+ * @param {string|null} userContext - Optional user-provided context/vision for the design
  * @returns {Promise<Object>} - Structured analysis with segmented suggestions
  */
-export async function analyzeDesignV5(base64Image, mimeType) {
+export async function analyzeDesignV5(base64Image, mimeType, userContext = null) {
   // const apiKey = process.env.GEMINI_API_KEY || "AIzaSyDMNg25PPraSZCaEc6Bf0PWESU4VBLpdDQ";
   // console.log("apiKey", apiKey);
   // if (apiKey.length === 0) {
@@ -16,7 +17,7 @@ export async function analyzeDesignV5(base64Image, mimeType) {
   //   );
   // }
 
-  const ai = new GoogleGenAI({ apiKey: "AIzaSyATcFQfczuIhv4Qg9kSXLEWiDiWRtym8sc" });
+  const ai = new GoogleGenAI({ apiKey: "AIzaSyAhqZp8MWfYBh8dCcvFXj-StKo_LY0S1DM" });
 
   // Remove data URI prefix if present
   const base64Data = base64Image.includes(",")
@@ -30,8 +31,20 @@ export async function analyzeDesignV5(base64Image, mimeType) {
     },
   };
 
-  const prompt = `You are a creative design assistant. Analyze this design/image and provide structured suggestions to enhance it.
+  // Build the prompt with optional user context
+  let contextSection = "";
+  if (userContext) {
+    contextSection = `
+USER'S VISION/CONTEXT:
+The user has provided the following context about their design:
+"${userContext}"
 
+Use this context to guide your suggestions. Make sure your recommendations align with the user's intended theme, purpose, or vision. Tailor search keywords and element types to match their stated goals.
+`;
+  }
+
+  const prompt = `You are a creative design assistant. Analyze this design/image and provide structured suggestions to enhance it.
+${contextSection}
 IMPORTANT: Return ONLY valid JSON, no markdown code blocks or extra text.
 
 Analyze the image and return suggestions in this exact JSON structure:
@@ -58,6 +71,7 @@ RULES:
 3. search_keywords should be optimized for stock photo/GIF search (2-3 keywords per suggestion)
 4. Only suggest element types that make sense for the design context
 5. Prioritize suggestions by impact - most impactful first
+${userContext ? "6. Heavily weight suggestions toward the user's stated vision/context" : ""}
 
 ELEMENT TYPE GUIDANCE:
 - "background": For adding depth, texture, or atmosphere (use for empty/plain backgrounds)
@@ -159,7 +173,7 @@ ELEMENT TYPE GUIDANCE:
  * @returns {Promise<{suggestion_for_improvements: string, keywords: {most_relevant: string, other_keywords: string[]}}>}
  */
 export async function analyzeDesign(base64Image, mimeType) {
-  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyATcFQfczuIhv4Qg9kSXLEWiDiWRtym8sc";
+  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyAhqZp8MWfYBh8dCcvFXj-StKo_LY0S1DM";
   if (apiKey.length === 0) {
     throw new Error(
       "Gemini API key is not configured second. Please set GEMINI_API_KEY in your .env file."
@@ -257,7 +271,7 @@ Return ONLY valid JSON in this exact format:
 
 export async function performOCR(base64Image, mimeType) {
   // Check if API key is available
-  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyATcFQfczuIhv4Qg9kSXLEWiDiWRtym8sc";
+  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyAhqZp8MWfYBh8dCcvFXj-StKo_LY0S1DM";
   console.log("apiKey", apiKey);
   if (apiKey.length === 0) {
     throw new Error(

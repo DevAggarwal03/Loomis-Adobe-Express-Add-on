@@ -31,6 +31,37 @@ export const style = css`
     margin-bottom: 16px;
   }
 
+  /* ===== CONTEXT INPUT ===== */
+  .context-input-wrapper {
+    margin-bottom: 14px;
+  }
+
+  .context-textfield {
+    width: 100%;
+    --spectrum-textfield-border-color: #e2e8f0;
+    --spectrum-textfield-border-color-hover: #667eea;
+    --spectrum-textfield-border-color-focus: #667eea;
+    --spectrum-textfield-border-color-focus-hover: #764ba2;
+    --spectrum-textfield-text-color: #2d3748;
+    --spectrum-textfield-placeholder-text-color: #a0aec0;
+    --spectrum-textfield-background-color: white;
+  }
+
+  .context-textfield::part(textfield) {
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+  }
+
+  .context-textfield:hover::part(textfield) {
+    border-color: #667eea;
+  }
+
+  .context-textfield:focus-within::part(textfield) {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+  }
+
   .upload-controls {
     display: flex;
     flex-direction: column;
