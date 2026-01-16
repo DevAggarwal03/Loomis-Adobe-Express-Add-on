@@ -1,4 +1,4 @@
-# Meme Machine Add-on - Architecture & Code Structure Documentation
+# Loomis Add-on - Architecture & Code Structure Documentation
 
 ## Table of Contents
 1. [Architecture Overview](#architecture-overview)
@@ -13,7 +13,7 @@
 
 ## Architecture Overview
 
-The Meme Machine add-on is built using **Adobe Express Add-on SDK** with a **two-runtime architecture**:
+The Loomis add-on is built using **Adobe Express Add-on SDK** with a **two-runtime architecture**:
 
 1. **UI Runtime (iframe)**: Handles user interface, search interactions, and displays results
 2. **Document Sandbox Runtime**: Minimal runtime for potential future document manipulation APIs
@@ -321,7 +321,7 @@ Error Occurs → Catch Block → Update _errorMessage → Render Error UI
 **Required Parameters**:
 - `key`: API key (from Tenor developer console)
 - `q`: Search query string
-- `client_key`: Client identifier ("meme_machine_addon")
+- `client_key`: Client identifier ("loomis_addon")
 
 **Recommended Parameters**:
 - `limit`: Results count (default: 20, max: 50)
@@ -519,7 +519,7 @@ Error Occurs → Catch Block → Update _errorMessage → Render Error UI
 
 ## Summary
 
-The Meme Machine add-on follows a clean, simple architecture:
+The Loomis add-on follows a clean, simple architecture:
 
 - **UI Layer**: Lit components with reactive state
 - **Service Layer**: API integration separated from UI

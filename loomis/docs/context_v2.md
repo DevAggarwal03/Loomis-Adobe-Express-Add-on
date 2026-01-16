@@ -1,4 +1,4 @@
-# Meme Machine Add-on - Architecture Documentation (v2)
+# Loomis Add-on - Architecture Documentation (v2)
 
 ## Overview
 

@@ -1,4 +1,4 @@
-# Meme Machine - Adobe Express Add-on
+# Loomis - Adobe Express Add-on
 
 A simple Adobe Express add-on that allows users to search for memes and GIFs using Tenor API and insert them directly into their designs.
 
@@ -115,7 +115,7 @@ v1/
 
 ## Requirements
 
-- Node.js 14+ 
+- Node.js 14+
 - npm or yarn
 - Tenor API key (free)
 

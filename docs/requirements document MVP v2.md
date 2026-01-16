@@ -1,6 +1,6 @@
 # 📄 Requirements Document
 
-**Project:** Meme-Machine — One-Stop Expressive Add-on for Adobe Express  
+**Project:** Loomis — One-Stop Expressive Add-on for Adobe Express  
 **Version:** MVP v2  
 **Purpose:** Enable users to intelligently find and insert relevant memes/GIFs into Adobe Express using text input or image upload with AI-assisted query generation.
 

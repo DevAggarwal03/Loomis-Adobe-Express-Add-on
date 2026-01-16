@@ -156,4 +156,96 @@ export const style = css`
     margin: 0;
     font-size: 14px;
   }
+
+  /* V4: Suggestions View Styles */
+  .suggestions-view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    background-color: var(--spectrum-global-color-gray-50);
+    border-radius: 8px;
+    border: 1px solid var(--spectrum-global-color-gray-200);
+    margin-bottom: 16px;
+  }
+
+  .find-resources-btn {
+    width: 100%;
+  }
+
+  .suggestion-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--spectrum-global-color-gray-800);
+    padding: 12px;
+    background-color: var(--spectrum-global-color-gray-100);
+    border-radius: 6px;
+    border-left: 3px solid var(--spectrum-global-color-blue-500);
+  }
+
+  /* V4: Resources View Styles */
+  .resources-view {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .keywords-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .keyword-chip {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-family: var(--spectrum-global-font-family-base);
+    background-color: var(--spectrum-global-color-gray-100);
+    color: var(--spectrum-global-color-gray-800);
+    border: 1px solid var(--spectrum-global-color-gray-300);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .keyword-chip:hover:not(:disabled) {
+    background-color: var(--spectrum-global-color-blue-100);
+    border-color: var(--spectrum-global-color-blue-400);
+    color: var(--spectrum-global-color-blue-700);
+  }
+
+  .keyword-chip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .resource-type-selector {
+    display: flex;
+    gap: 16px;
+    padding: 8px 0;
+    border-top: 1px solid var(--spectrum-global-color-gray-200);
+    border-bottom: 1px solid var(--spectrum-global-color-gray-200);
+  }
+
+  .resource-type-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--spectrum-global-color-gray-700);
+    cursor: pointer;
+  }
+
+  .resource-type-label input[type="radio"] {
+    accent-color: var(--spectrum-global-color-blue-500);
+  }
+
+  .resources-view .results-grid {
+    flex: 1;
+    overflow-y: auto;
+  }
 `;

@@ -24,7 +24,7 @@ import {
   getPreviewUrl,
   cleanQuery,
 } from "../services/tenorApi.js";
-import { performOCR } from "../services/geminiService.js";
+import { performOCR, analyzeDesign } from "../services/geminiService.js";
 
 @customElement("add-on-app")
 export class App extends LitElement {
@@ -57,6 +57,19 @@ export class App extends LitElement {
 
   @state()
   _isAutoFilled = false;
+
+  // V4: New state variables for enhanced canvas analysis
+  @state()
+  _geminiResult = null; // { suggestion_for_improvements, keywords }
+
+  @state()
+  _showResourcesView = false; // Toggle between suggestions and resources view
+
+  @state()
+  _otherKeywords = []; // Array of clickable keywords
+
+  @state()
+  _selectedResourceType = "gifs"; // For v4, only "gifs"
 
   static get styles() {
     return style;
@@ -148,17 +161,22 @@ export class App extends LitElement {
 
     this._isProcessingUpload = true;
     this._errorMessage = "";
+    // Reset previous state
+    this._geminiResult = null;
+    this._showResourcesView = false;
+    this._searchResults = [];
 
     try {
       // Read file as base64
       const base64Image = await this._readFileAsBase64(file);
 
-      // Call Gemini API
-      const query = await performOCR(base64Image, file.type);
+      // Call Gemini API with new analyzeDesign function
+      const result = await analyzeDesign(base64Image, file.type);
 
-      // Auto-fill search query (user can edit before searching)
-      this._searchQuery = query.trim();
-      this._isAutoFilled = true;
+      // Store the result and show suggestions view (Phase 1)
+      this._geminiResult = result;
+      this._otherKeywords = result.keywords?.other_keywords || [];
+      this._showResourcesView = false; // Show suggestions first
 
       // Clear any previous error messages
       this._errorMessage = "";
@@ -235,11 +253,15 @@ export class App extends LitElement {
   }
 
   /**
-   * Handle scan from canvas: export canvas, analyze with Gemini, auto-fill search
+   * Handle scan from canvas: export canvas, analyze with Gemini, show suggestions
    */
   async _handleScanFromCanvas() {
     this._isProcessingScan = true;
     this._errorMessage = "";
+    // Reset previous state
+    this._geminiResult = null;
+    this._showResourcesView = false;
+    this._searchResults = [];
 
     try {
       // Export canvas as PNG blob
@@ -248,12 +270,13 @@ export class App extends LitElement {
       // Convert blob to base64
       const base64Image = await this._blobToBase64(pngBlob);
 
-      // Call Gemini API to analyze the image
-      const query = await performOCR(base64Image, "image/png");
+      // Call Gemini API with new analyzeDesign function
+      const result = await analyzeDesign(base64Image, "image/png");
 
-      // Auto-fill search query (user can edit before searching)
-      this._searchQuery = query.trim();
-      this._isAutoFilled = true;
+      // Store the result and show suggestions view (Phase 1)
+      this._geminiResult = result;
+      this._otherKeywords = result.keywords?.other_keywords || [];
+      this._showResourcesView = false; // Show suggestions first
 
       // Clear any previous error messages
       this._errorMessage = "";
@@ -265,6 +288,36 @@ export class App extends LitElement {
     } finally {
       this._isProcessingScan = false;
     }
+  }
+
+  /**
+   * Handle "Find Relevant Resources" button click
+   * Transition from suggestions view to resources view and auto-search
+   */
+  async _handleFindResources() {
+    if (!this._geminiResult?.keywords?.most_relevant) {
+      return;
+    }
+
+    // Set the search query to the most relevant keyword
+    this._searchQuery = this._geminiResult.keywords.most_relevant;
+    this._isAutoFilled = true;
+
+    // Switch to resources view (Phase 2)
+    this._showResourcesView = true;
+
+    // Auto-execute search
+    await this._handleSearch();
+  }
+
+  /**
+   * Handle keyword chip click
+   * Fill search box with the clicked keyword and trigger search
+   */
+  async _handleKeywordClick(keyword) {
+    this._searchQuery = keyword;
+    this._isAutoFilled = true;
+    await this._handleSearch();
   }
 
   async _handleInsertGif(gifResult) {
@@ -323,6 +376,149 @@ export class App extends LitElement {
     }
   }
 
+  /**
+   * Render the suggestions view (Phase 1)
+   * Shows the "Find Relevant Resources" button and suggestion text
+   */
+  _renderSuggestionsView() {
+    if (!this._geminiResult) return "";
+
+    return html`
+      <div class="suggestions-view">
+        <sp-button
+          size="m"
+          variant="accent"
+          @click=${this._handleFindResources}
+          ?disabled=${this._isLoading}
+          class="find-resources-btn"
+        >
+          Find Relevant Resources
+        </sp-button>
+        <p class="suggestion-text">
+          ${this._geminiResult.suggestion_for_improvements}
+        </p>
+      </div>
+    `;
+  }
+
+  /**
+   * Render the resources view (Phase 2)
+   * Shows search box, keyword chips, and GIF results
+   */
+  _renderResourcesView() {
+    return html`
+      <div class="resources-view">
+        <div class="search-controls">
+          <input
+            type="text"
+            class="search-input native-input ${this._isAutoFilled
+              ? "auto-filled"
+              : ""}"
+            placeholder="Search for memes or GIFs..."
+            .value=${this._searchQuery}
+            @input=${this._handleSearchInput}
+            @keypress=${this._handleSearchKeyPress}
+            ?disabled=${this._isLoading}
+          />
+          <sp-button
+            size="m"
+            variant="primary"
+            @click=${this._handleSearch}
+            ?disabled=${this._isLoading || !this._searchQuery.trim()}
+          >
+            ${this._isLoading ? "Searching..." : "Go"}
+          </sp-button>
+        </div>
+
+        ${this._otherKeywords.length > 0
+          ? html`
+              <div class="keywords-container">
+                ${this._otherKeywords.map(
+                  (keyword) => html`
+                    <button
+                      class="keyword-chip"
+                      @click=${() => this._handleKeywordClick(keyword)}
+                      ?disabled=${this._isLoading}
+                    >
+                      ${keyword}
+                    </button>
+                  `
+                )}
+              </div>
+            `
+          : ""}
+
+        <div class="resource-type-selector">
+          <label class="resource-type-label">
+            <input
+              type="radio"
+              name="resourceType"
+              value="gifs"
+              ?checked=${this._selectedResourceType === "gifs"}
+              disabled
+            />
+            GIFs
+          </label>
+        </div>
+
+        ${this._errorMessage
+          ? html` <div class="error-message">${this._errorMessage}</div> `
+          : ""}
+        ${this._isLoading
+          ? html` <div class="loading">Loading GIFs...</div> `
+          : ""}
+        ${!this._isLoading && this._searchResults.length > 0
+          ? html`
+              <div class="results-grid">
+                ${this._searchResults.map((result) => {
+                  const previewUrl = getPreviewUrl(result);
+                  const isInserting = this._insertingGifId === result.id;
+
+                  return html`
+                    <div class="gif-item">
+                      ${previewUrl
+                        ? html`
+                            <img
+                              src="${previewUrl}"
+                              alt="${result.title || "GIF"}"
+                              class="gif-preview"
+                              loading="lazy"
+                            />
+                          `
+                        : html`
+                            <div class="gif-placeholder">
+                              No preview available
+                            </div>
+                          `}
+                      <sp-button
+                        size="s"
+                        variant="primary"
+                        @click=${() => this._handleInsertGif(result)}
+                        ?disabled=${isInserting || this._insertingGifId !== null}
+                        class="insert-button"
+                      >
+                        ${isInserting ? "Inserting..." : "Add"}
+                      </sp-button>
+                    </div>
+                  `;
+                })}
+              </div>
+            `
+          : ""}
+        ${!this._isLoading &&
+        this._searchResults.length === 0 &&
+        this._searchQuery &&
+        !this._errorMessage
+          ? html`
+              <div class="empty-state">
+                <p>No results found. Try a different keyword above!</p>
+              </div>
+            `
+          : ""}
+      </div>
+    `;
+  }
+
   render() {
     // Please note that the below "<sp-theme>" component does not react to theme changes in Express.
     // You may use "this.addOnUISdk.app.ui.theme" to get the current theme and react accordingly.
@@ -330,7 +526,7 @@ export class App extends LitElement {
       <sp-theme system="express" color="light" scale="medium">
         <div class="container">
           <div class="search-section">
-            <h2 class="title">Meme & GIF Finder</h2>
+            <h2 class="title">Loomis</h2>
             <div class="upload-controls">
               <input
                 type="file"
@@ -350,7 +546,7 @@ export class App extends LitElement {
               >
                 ${this._isProcessingUpload
                   ? "Processing..."
-                  : "Upload from Device"}
+                  : "Import from Device"}
               </sp-button>
               <sp-button
                 size="m"
@@ -361,104 +557,40 @@ export class App extends LitElement {
                 this._isLoading}
                 class="scan-button"
               >
-                ${this._isProcessingScan ? "Scanning..." : "Scan from Canvas"}
-              </sp-button>
-            </div>
-            <div class="search-controls">
-              <input
-                type="text"
-                class="search-input native-input ${this._isAutoFilled
-                  ? "auto-filled"
-                  : ""}"
-                placeholder="Search for memes or GIFs..."
-                .value=${this._searchQuery}
-                @input=${this._handleSearchInput}
-                @keypress=${this._handleSearchKeyPress}
-                ?disabled=${this._isLoading ||
-                this._isProcessingUpload ||
-                this._isProcessingScan}
-              />
-              <sp-button
-                size="m"
-                variant="primary"
-                @click=${this._handleSearch}
-                ?disabled=${this._isLoading ||
-                this._isProcessingUpload ||
-                this._isProcessingScan ||
-                !this._searchQuery.trim()}
-              >
-                ${this._isLoading ? "Searching..." : "Search"}
+                ${this._isProcessingScan ? "Scanning..." : "Scan my Canvas"}
               </sp-button>
             </div>
 
-            ${this._errorMessage
+            ${this._errorMessage && !this._showResourcesView
               ? html` <div class="error-message">${this._errorMessage}</div> `
               : ""}
             ${this._isProcessingUpload
-              ? html` <div class="loading">Processing image...</div> `
+              ? html` <div class="loading">Analyzing image...</div> `
               : ""}
             ${this._isProcessingScan
-              ? html` <div class="loading">Scanning canvas...</div> `
+              ? html` <div class="loading">Analyzing canvas...</div> `
               : ""}
           </div>
 
-          ${this._isLoading
-            ? html` <div class="loading">Loading GIFs...</div> `
+          <!-- Phase 1: Suggestions View (shown after analysis, before clicking Find Resources) -->
+          ${this._geminiResult && !this._showResourcesView
+            ? this._renderSuggestionsView()
             : ""}
-          ${!this._isLoading && this._searchResults.length > 0
-            ? html`
-                <div class="results-grid">
-                  ${this._searchResults.map((result) => {
-                    const previewUrl = getPreviewUrl(result);
-                    const isInserting = this._insertingGifId === result.id;
 
-                    return html`
-                      <div class="gif-item">
-                        ${previewUrl
-                          ? html`
-                              <img
-                                src="${previewUrl}"
-                                alt="${result.title || "GIF"}"
-                                class="gif-preview"
-                                loading="lazy"
-                              />
-                            `
-                          : html`
-                              <div class="gif-placeholder">
-                                No preview available
-                              </div>
-                            `}
-                        <sp-button
-                          size="s"
-                          variant="primary"
-                          @click=${() => this._handleInsertGif(result)}
-                          ?disabled=${isInserting ||
-                          this._insertingGifId !== null}
-                          class="insert-button"
-                        >
-                          ${isInserting ? "Inserting..." : "Add to Document"}
-                        </sp-button>
-                      </div>
-                    `;
-                  })}
-                </div>
-              `
-            : ""}
-          ${!this._isLoading &&
-          this._searchResults.length === 0 &&
-          this._searchQuery
-            ? html`
-                <div class="empty-state">
-                  <p>No results found. Try searching for something else!</p>
-                </div>
-              `
-            : ""}
-          ${!this._isLoading &&
-          this._searchResults.length === 0 &&
-          !this._searchQuery
+          <!-- Phase 2: Resources View (shown after clicking Find Relevant Resources) -->
+          ${this._showResourcesView ? this._renderResourcesView() : ""}
+
+          <!-- Default state: No analysis yet, show manual search or welcome -->
+          ${!this._geminiResult &&
+          !this._showResourcesView &&
+          !this._isProcessingUpload &&
+          !this._isProcessingScan
             ? html`
                 <div class="welcome-state">
-                  <p>Enter a keyword above to search for memes and GIFs!</p>
+                  <p>
+                    Upload an image or scan your canvas to get design
+                    suggestions and find relevant GIFs!
+                  </p>
                 </div>
               `
             : ""}

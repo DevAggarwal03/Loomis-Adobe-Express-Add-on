@@ -1,4 +1,4 @@
-# Meme Machine
+# Loomis
 
 An Adobe Express add-on that allows users to quickly search for and insert memes/GIFs from Tenor directly into their designs. The add-on uses AI to understand images and suggest relevant search queries.
 
@@ -29,7 +29,7 @@ An Adobe Express add-on that allows users to quickly search for and insert memes
 ## Project Structure
 
 ```
-Meme-Machine/
+Loomis/
 ├── v3/                    # Current version (v3 implementation)
 │   ├── src/
 │   │   ├── ui/            # UI runtime code
@@ -105,7 +105,7 @@ The add-on will be served at `https://localhost:5241` for development.
 3. Go to Add-ons panel
 4. Click "Load Add-on" and enter: `https://localhost:5241`
 5. Accept the SSL certificate warning (development only)
-6. The Meme Machine add-on should appear in your panel
+6. The Loomis add-on should appear in your panel
 
 ## Usage
 

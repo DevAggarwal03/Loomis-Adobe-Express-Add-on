@@ -11,7 +11,7 @@
 
 const TENOR_API_KEY = "AIzaSyAFFGjQR7cyu_7rxId7cT8jkU0hJy7F2k0" || process.env.TENOR_API_KEY || "";
 const TENOR_BASE_URL = "https://tenor.googleapis.com/v2";
-const CLIENT_KEY = "meme_machine_addon";
+const CLIENT_KEY = "loomis_addon";
 
 if (!TENOR_API_KEY) {
   console.warn(

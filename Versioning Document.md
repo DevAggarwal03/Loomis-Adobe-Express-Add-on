@@ -1,6 +1,6 @@
-# Meme Machine — Version Roadmap (Frontend-Only)
+# Loomis — Version Roadmap (Frontend-Only)
 
-This document defines the evolution of Meme Machine starting from the shipped MVP (v1), assuming a **pure frontend architecture inside Adobe Express**.
+This document defines the evolution of Loomis starting from the shipped MVP (v1), assuming a **pure frontend architecture inside Adobe Express**.
 
 No backend. No servers. No persistence beyond local state.
 
@@ -52,7 +52,9 @@ Upload image → AI suggests meaning → search auto-fills → user edits → Se
 
 ---
 
-## v3 — Add “Scan from Canvas” → Understand → Editable Search
+## v3 — Add "Scan from Canvas" → Understand → Editable Search
+
+**Status:** Implemented
 
 **Goal:** Add convenience without removing existing workflows.
 
@@ -61,7 +63,7 @@ Scan from canvas → AI suggests meaning → search auto-fills → user edits �
 
 ### Features
 
-* New **“Scan from Canvas”** button (in addition to upload)
+* New **"Scan from Canvas"** button (in addition to upload)
 * Capture current canvas or screen region
 * Manual scan trigger (no auto capture)
 * Frame passed to Gemini
@@ -76,7 +78,38 @@ Scan from canvas → AI suggests meaning → search auto-fills → user edits �
 
 ---
 
-## v4 — Stickers + Multi-Tab
+## v4 — Enhanced Canvas Analysis with Design Suggestions
+
+**Status:** Implemented
+
+**Goal:** Show design improvement suggestions first, then reveal resources search on user action.
+
+**Flow**
+Upload/Scan → AI analyzes → Show Suggestions (Phase 1) → Find Resources (Phase 2) → Search with keywords
+
+### Features
+
+* Enhanced Gemini analysis returning:
+  * Design improvement suggestions (2-3 sentences)
+  * Primary search keyword (`most_relevant`)
+  * Additional keyword chips (`other_keywords`)
+* Two-phase UI:
+  * **Phase 1 (Suggestions View):** Shows "Find Relevant Resources" button + suggestion text
+  * **Phase 2 (Resources View):** Search box auto-filled, keyword chips, GIF grid
+* Clickable keyword chips that trigger new searches
+* Resource type selector (GIFs only for v4, prepared for expansion)
+* Auto-search on phase transition
+
+### Architecture
+
+* New `analyzeDesign()` function in `geminiService.js`
+* JSON response parsing with validation
+* State-driven UI transitions (`_geminiResult`, `_showResourcesView`)
+* Reusable render methods (`_renderSuggestionsView`, `_renderResourcesView`)
+
+---
+
+## v5 — Stickers + Multi-Tab
 
 **Goal:** Turn intent into creative components.
 
@@ -95,7 +128,7 @@ Scan from canvas → AI suggests meaning → search auto-fills → user edits �
 
 ---
 
-## v5 — Illustrations
+## v6 — Illustrations
 
 **Goal:** Enable creative generation.
 
@@ -115,7 +148,7 @@ Scan from canvas → AI suggests meaning → search auto-fills → user edits �
 
 ---
 
-## v6 — Product Polish
+## v7 — Product Polish
 
 **Goal:** Make it delightful and robust.
 
@@ -141,11 +174,12 @@ Scan from canvas → AI suggests meaning → search auto-fills → user edits �
 
 ## Summary
 
-| Version | Focus                 |
-| ------- | --------------------- |
-| v1      | Keyword search        |
-| v2      | Upload image → intent |
-| v3      | Add scan from canvas  |
-| v4      | Stickers              |
-| v5      | Illustrations         |
-| v6      | Polish                |
+| Version | Focus                          | Status      |
+| ------- | ------------------------------ | ----------- |
+| v1      | Keyword search                 | Implemented |
+| v2      | Upload image → intent          | Implemented |
+| v3      | Add scan from canvas           | Implemented |
+| v4      | Enhanced analysis + suggestions| Implemented |
+| v5      | Stickers + Multi-Tab           | Planned     |
+| v6      | Illustrations                  | Planned     |
+| v7      | Polish                         | Planned     |
