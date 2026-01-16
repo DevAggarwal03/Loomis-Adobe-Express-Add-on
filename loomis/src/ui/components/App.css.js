@@ -10,10 +10,12 @@ export const style = css`
   }
 
   .title {
-    margin: 0 0 16px 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--spectrum-global-color-gray-900);
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #4a5568;
+    text-align: center;
   }
 
   .search-section {
@@ -23,13 +25,108 @@ export const style = css`
 
   .upload-controls {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    gap: 10px;
     margin-bottom: 12px;
   }
 
-  .upload-button,
-  .scan-button {
-    flex: 1;
+  /* AI Rainbow Border Button for Scan Canvas */
+  .scan-button-ai {
+    position: relative;
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--spectrum-global-font-family-base);
+    color: #4a5568;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background: white;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 1;
+  }
+
+  .scan-button-ai::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 10px;
+    padding: 2px;
+    background: linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 25%,
+      #f093fb 50%,
+      #f5576c 75%,
+      #4facfe 100%
+    );
+    background-size: 300% 300%;
+    animation: gradient-shift 4s ease infinite;
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: -1;
+  }
+
+  .scan-button-ai:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .scan-button-ai:hover:not(:disabled)::before {
+    animation: gradient-shift 1.5s ease infinite;
+  }
+
+  .scan-button-ai:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .scan-button-ai:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .scan-button-ai.processing::before {
+    animation: gradient-shift 1s ease infinite;
+  }
+
+  .scan-button-text {
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .upload-button {
+    width: 100%;
+    --spectrum-button-secondary-border-color: #667eea;
+    --spectrum-button-secondary-border-color-hover: #764ba2;
+    --spectrum-button-secondary-text-color: #667eea;
+    --spectrum-button-secondary-text-color-hover: #764ba2;
+    border: 2px solid #667eea !important;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .upload-button:hover:not([disabled]) {
+    border-color: #764ba2 !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
   }
 
   .search-controls {
@@ -91,6 +188,134 @@ export const style = css`
     text-align: center;
     padding: 32px;
     color: var(--spectrum-global-color-gray-700);
+  }
+
+  /* Space-themed Loading Animation */
+  .space-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: transparent;
+    border-radius: 16px;
+    margin-top: 16px;
+    position: relative;
+  }
+
+  .orbit {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    animation: orbit-rotate 8s linear infinite;
+  }
+
+  @keyframes orbit-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .planet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    box-shadow: 
+      0 0 20px rgba(102, 126, 234, 0.6),
+      inset -4px -4px 8px rgba(0, 0, 0, 0.3),
+      inset 4px 4px 8px rgba(255, 255, 255, 0.2);
+    animation: planet-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes planet-pulse {
+    0%, 100% { 
+      transform: scale(1);
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.6),
+        inset -4px -4px 8px rgba(0, 0, 0, 0.3),
+        inset 4px 4px 8px rgba(255, 255, 255, 0.2);
+    }
+    50% { 
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(102, 126, 234, 0.8),
+        inset -4px -4px 8px rgba(0, 0, 0, 0.3),
+        inset 4px 4px 8px rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  .moon {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    margin-left: -6px;
+    background: linear-gradient(135deg, #e0e0e0 0%, #a0a0a0 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+
+  .star {
+    position: absolute;
+    font-size: 14px;
+    color: #ffd700;
+    animation: star-twinkle 1.5s ease-in-out infinite;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+  }
+
+  .star-1 {
+    top: 20%;
+    right: 10%;
+    animation-delay: 0s;
+  }
+
+  .star-2 {
+    bottom: 20%;
+    right: 20%;
+    animation-delay: 0.3s;
+    font-size: 10px;
+  }
+
+  .star-3 {
+    bottom: 30%;
+    left: 10%;
+    animation-delay: 0.6s;
+  }
+
+  .star-4 {
+    top: 30%;
+    left: 20%;
+    animation-delay: 0.9s;
+    font-size: 10px;
+  }
+
+  @keyframes star-twinkle {
+    0%, 100% { 
+      opacity: 0.4;
+      transform: scale(0.8) rotate(0deg);
+    }
+    50% { 
+      opacity: 1;
+      transform: scale(1.2) rotate(180deg);
+    }
+  }
+
+  .loading-text {
+    margin-top: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4a5568;
+    letter-spacing: 0.5px;
+    animation: text-fade 2s ease-in-out infinite;
+    z-index: 1;
+  }
+
+  @keyframes text-fade {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
   }
 
   .results-grid {

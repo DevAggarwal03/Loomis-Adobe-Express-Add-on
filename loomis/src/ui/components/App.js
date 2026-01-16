@@ -535,6 +535,19 @@ export class App extends LitElement {
                 style="display: none;"
                 @change=${this._handleFileUpload}
               />
+              <!-- Primary action: Scan from Canvas with AI gradient -->
+              <button
+                class="scan-button-ai ${this._isProcessingScan ? 'processing' : ''}"
+                @click=${this._handleScanFromCanvas}
+                ?disabled=${this._isProcessingScan ||
+                this._isProcessingUpload ||
+                this._isLoading}
+              >
+                <span class="scan-button-text">
+                  ${this._isProcessingScan ? "✨ Analyzing..." : "✨ Scan my Canvas"}
+                </span>
+              </button>
+              <!-- Secondary action: Import from Device -->
               <sp-button
                 size="m"
                 variant="secondary"
@@ -548,27 +561,27 @@ export class App extends LitElement {
                   ? "Processing..."
                   : "Import from Device"}
               </sp-button>
-              <sp-button
-                size="m"
-                variant="secondary"
-                @click=${this._handleScanFromCanvas}
-                ?disabled=${this._isProcessingScan ||
-                this._isProcessingUpload ||
-                this._isLoading}
-                class="scan-button"
-              >
-                ${this._isProcessingScan ? "Scanning..." : "Scan my Canvas"}
-              </sp-button>
             </div>
 
             ${this._errorMessage && !this._showResourcesView
               ? html` <div class="error-message">${this._errorMessage}</div> `
               : ""}
-            ${this._isProcessingUpload
-              ? html` <div class="loading">Analyzing image...</div> `
-              : ""}
-            ${this._isProcessingScan
-              ? html` <div class="loading">Analyzing canvas...</div> `
+            ${this._isProcessingUpload || this._isProcessingScan
+              ? html`
+                <div class="space-loader">
+                  <div class="orbit">
+                    <div class="planet"></div>
+                    <div class="star star-1">✦</div>
+                    <div class="star star-2">✧</div>
+                    <div class="star star-3">✦</div>
+                    <div class="star star-4">✧</div>
+                    <div class="moon"></div>
+                  </div>
+                  <p class="loading-text">
+                    ${this._isProcessingUpload ? "Analyzing image..." : "Analyzing canvas..."}
+                  </p>
+                </div>
+              `
               : ""}
           </div>
 
