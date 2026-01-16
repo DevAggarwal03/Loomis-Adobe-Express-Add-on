@@ -1,4 +1,4 @@
-<img width="1920" height="1080" alt="Untitled" src="https://github.com/user-attachments/assets/7a10cc4d-1dac-4c80-bc4b-f333a50fa651" />
+<img width="1920" height="720" alt="Untitled" src="https://github.com/user-attachments/assets/7a10cc4d-1dac-4c80-bc4b-f333a50fa651" />
 
 # Loomis
 
