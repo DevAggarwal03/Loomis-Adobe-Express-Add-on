@@ -1,6 +1,14 @@
-# Loomis - Adobe Express Add-on
+# Loomis v5 - Adobe Express Add-on
 
-A simple Adobe Express add-on that allows users to search for memes and GIFs using Tenor API and insert them directly into their designs.
+An AI-powered Adobe Express add-on that analyzes your designs and provides intelligent suggestions for backgrounds, GIFs, memes, illustrations, and images.
+
+## Features
+
+- **🔍 Canvas Scanning**: Analyze your current canvas to get AI-powered suggestions
+- **📤 Image Upload**: Upload an image to get design enhancement ideas
+- **🎨 Multi-Source Assets**: Access content from Tenor (GIFs/Memes) and Unsplash (Images/Backgrounds/Illustrations)
+- **⚡ One-Click Insert**: Add any asset directly to your canvas
+- **📱 Segmented Suggestions**: Organized suggestions by element type with explanations
 
 ## Installation
 
@@ -10,67 +18,33 @@ A simple Adobe Express add-on that allows users to search for memes and GIFs usi
 npm install
 ```
 
-### 2. Configure Tenor API Key
+### 2. Configure API Keys
 
-- Sign up for a free API key at [Tenor API](https://developers.google.com/tenor/guides/quickstart)
-- Copy `.env.example` to `.env`:
-  ```bash
-  cp .env.example .env
-  ```
-- Open `.env` and set `TENOR_API_KEY=your_actual_api_key_here`
+Create a `.env` file in the project root with the following keys:
 
-### 3. Build the Add-on
+```env
+# Required - Gemini API Key for image analysis
+# Get your key at: https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=your_gemini_api_key_here
 
-```bash
-npm run build
+# Required - Unsplash API Key for backgrounds, illustrations, images
+# Get your key at: https://unsplash.com/developers
+UNSPLASH_ACCESS_KEY=your_unsplash_access_key_here
+
+# Optional - Tenor API Key (a default key is provided for development)
+# Get your key at: https://developers.google.com/tenor/guides/quickstart
+TENOR_API_KEY=your_tenor_api_key_here
 ```
-
-### 4. Start Development Server
-
-```bash
-npm run start
-```
-
-### 5. Load in Adobe Express
-
-- Open [Adobe Express](https://express.adobe.com)
-- Navigate to Add-ons, select "Load Add-on", and enter your dev server URL (`http://localhost:3000` by default)
-
-## Setup
-
-### 1. Install Dependencies
-
-```bash
-npm install
-```
-
-### 2. Configure Tenor API Key
-
-1. Get a free API key from [Tenor API](https://developers.google.com/tenor/guides/quickstart)
-2. Create a `.env` file in the project root (copy from `.env.example`):
-   ```bash
-   cp .env.example .env
-   ```
-3. Open `.env` and add your API key:
-   ```
-   TENOR_API_KEY=your_actual_api_key_here
-   ```
 
 **Note**: The `.env` file is gitignored and will not be committed to version control.
 
-### 3. Build the Add-on
-
-```bash
-npm run build
-```
-
-### 4. Start Development Server
+### 3. Start Development Server
 
 ```bash
 npm run start
 ```
 
-### 5. Load in Adobe Express
+### 4. Load in Adobe Express
 
 1. Open [Adobe Express](https://express.adobe.com)
 2. Create or open a document
@@ -79,27 +53,36 @@ npm run start
 
 ## Usage
 
-1. Enter a search term in the text field (e.g., "excited", "happy", "reaction")
-2. Click "Search" or press Enter
-3. Browse the results in the grid
-4. Click "Add to Document" on any GIF to insert it into your design
+### Scan Your Canvas
+1. Click the **"✨ Scan my Canvas"** button
+2. Wait for AI analysis
+3. Browse segmented suggestions (backgrounds, GIFs, memes, illustrations, images)
+4. Click **"+"** on any thumbnail to add it to your canvas
+5. Click **"More"** to see a full gallery for any category
+
+### Upload an Image
+1. Click **"Import from Device"**
+2. Select an image file
+3. Browse AI-generated suggestions
+4. Add assets to your canvas with one click
 
 ## Project Structure
 
 ```
-v1/
+loomis/
 ├── src/
 │   ├── ui/
 │   │   ├── components/
-│   │   │   ├── App.js          # Main UI component
-│   │   │   └── App.css.js      # Styles
+│   │   │   ├── App.js          # Main UI component with v5 views
+│   │   │   └── App.css.js      # Styles for all components
 │   │   ├── services/
-│   │   │   └── tenorApi.js     # Tenor API integration
+│   │   │   ├── geminiService.js      # Gemini Vision API (v5 analysis)
+│   │   │   ├── tenorApi.js           # Tenor API (GIFs/Memes)
+│   │   │   ├── unsplashApi.js        # Unsplash API (Images/Backgrounds)
+│   │   │   └── assetOrchestrator.js  # Central asset fetching
 │   │   └── index.js            # UI entry point
 │   ├── sandbox/
-│   │   └── code.js             # Document sandbox (minimal for MVP)
-│   ├── models/
-│   │   └── DocumentSandboxApi.ts  # TypeScript interface
+│   │   └── code.js             # Document sandbox
 │   ├── index.html              # HTML template
 │   └── manifest.json           # Add-on manifest
 ├── package.json
@@ -108,26 +91,41 @@ v1/
 
 ## Technologies
 
-- **Spectrum Web Components** - UI components
+- **Spectrum Web Components** - Adobe's design system components
 - **Lit** - Web components framework
-- **Tenor API** - GIF search provider
+- **Gemini Vision API** - AI image analysis
+- **Tenor API** - GIF and meme search
+- **Unsplash API** - Stock photos, backgrounds, illustrations
 - **Adobe Express Add-on SDK** - Integration with Adobe Express
 
-## Requirements
+## API Requirements
 
-- Node.js 14+
-- npm or yarn
-- Tenor API key (free)
+| API | Required | Free Tier | Purpose |
+|-----|----------|-----------|---------|
+| Gemini | Yes | Yes | Image analysis and suggestions |
+| Unsplash | Yes | Yes (50 req/hr) | Photos, backgrounds, illustrations |
+| Tenor | No* | Yes | GIFs and memes |
 
-## Development
+*A default Tenor key is included for development
+
+## Commands
 
 - `npm run start` - Start development server
 - `npm run build` - Build for production
 - `npm run clean` - Clean build artifacts
+- `npm run package` - Package for distribution
+
+## Version History
+
+- **v5.0.0** - AI-powered segmented suggestions, multi-source assets, one-click insert
+- **v4.0.0** - Two-phase UI with suggestions and resources
+- **v3.0.0** - Canvas scanning with Gemini analysis
+- **v2.0.0** - Image upload with OCR
+- **v1.0.0** - Basic GIF search and insert
 
 ## Notes
 
-- The add-on uses `addAnimatedImage()` API to preserve GIF animations
-- Search results are limited to 20 per query (configurable)
-- Content filter is set to "medium" for safety
+- Uses `addAnimatedImage()` for GIFs to preserve animation
+- Uses `addImage()` for static images from Unsplash
+- Unsplash downloads are tracked per API guidelines
 - No user data is stored (stateless)
