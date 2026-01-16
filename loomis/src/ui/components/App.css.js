@@ -540,6 +540,115 @@ export const style = css`
     color: #e53e3e;
   }
 
+  /* ===== CUSTOM GIF SEARCH CARD ===== */
+  .custom-search-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.1);
+    border: 1px dashed #cbd5e0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .custom-search-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
+  }
+
+  .search-input-container {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .custom-search-input {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    color: #2d3748;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+  }
+
+  .custom-search-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+  }
+
+  .custom-search-input::placeholder {
+    color: #a0aec0;
+  }
+
+  .custom-search-input:disabled {
+    background: #f7fafc;
+    cursor: not-allowed;
+  }
+
+  .custom-search-btn {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .custom-search-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  .custom-search-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .custom-search-error {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #fff5f5;
+    color: #c53030;
+    font-size: 12px;
+    border-radius: 6px;
+    border-left: 3px solid #fc8181;
+  }
+
+  .custom-search-results {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .clear-search-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    color: #718096;
+    background: #edf2f7;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+  }
+
+  .clear-search-btn:hover {
+    background: #e2e8f0;
+    color: #4a5568;
+  }
+
   /* ===== RESCAN BUTTON ===== */
   .rescan-btn {
     width: 100%;

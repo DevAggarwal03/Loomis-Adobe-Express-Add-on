@@ -8,15 +8,15 @@ import { GoogleGenAI } from "@google/genai";
  * @returns {Promise<Object>} - Structured analysis with segmented suggestions
  */
 export async function analyzeDesignV5(base64Image, mimeType) {
-  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyDMNg25PPraSZCaEc6Bf0PWESU4VBLpdDQ";
-  console.log("apiKey", apiKey);
-  if (apiKey.length === 0) {
-    throw new Error(
-      `Gemini API key is not configured ${apiKey} ${"afdfalnfkn"}. Please set GEMINI_API_KEY in your .env file.`
-    );
-  }
+  // const apiKey = process.env.GEMINI_API_KEY || "AIzaSyDMNg25PPraSZCaEc6Bf0PWESU4VBLpdDQ";
+  // console.log("apiKey", apiKey);
+  // if (apiKey.length === 0) {
+  //   throw new Error(
+  //     `Gemini API key is not configured ${apiKey} ${"afdfalnfkn"}. Please set GEMINI_API_KEY in your .env file.`
+  //   );
+  // }
 
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = new GoogleGenAI({ apiKey: "AIzaSyATcFQfczuIhv4Qg9kSXLEWiDiWRtym8sc" });
 
   // Remove data URI prefix if present
   const base64Data = base64Image.includes(",")
@@ -159,7 +159,7 @@ ELEMENT TYPE GUIDANCE:
  * @returns {Promise<{suggestion_for_improvements: string, keywords: {most_relevant: string, other_keywords: string[]}}>}
  */
 export async function analyzeDesign(base64Image, mimeType) {
-  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyDFblhjRgdphchPf0zKFchrUUbxsSdDIC8";
+  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyATcFQfczuIhv4Qg9kSXLEWiDiWRtym8sc";
   if (apiKey.length === 0) {
     throw new Error(
       "Gemini API key is not configured second. Please set GEMINI_API_KEY in your .env file."
@@ -257,7 +257,7 @@ Return ONLY valid JSON in this exact format:
 
 export async function performOCR(base64Image, mimeType) {
   // Check if API key is available
-  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyDFblhjRgdphchPf0zKFchrUUbxsSdDIC8";
+  const apiKey = process.env.GEMINI_API_KEY || "AIzaSyATcFQfczuIhv4Qg9kSXLEWiDiWRtym8sc";
   console.log("apiKey", apiKey);
   if (apiKey.length === 0) {
     throw new Error(

@@ -22,7 +22,7 @@ import {
   ELEMENT_ICONS,
 } from "../services/assetOrchestrator.js";
 import { trackDownload } from "../services/unsplashApi.js";
-import { getGifUrl } from "../services/tenorApi.js";
+import { getGifUrl, searchGifs, getPreviewUrl as getTenorPreviewUrl } from "../services/tenorApi.js";
 
 @customElement("add-on-app")
 export class App extends LitElement {
@@ -70,6 +70,19 @@ export class App extends LitElement {
   // V5: Inserting state
   @state()
   _insertingAssetId = null;
+
+  // Custom Tenor search state
+  @state()
+  _customSearchQuery = "";
+
+  @state()
+  _customSearchResults = [];
+
+  @state()
+  _customSearchLoading = false;
+
+  @state()
+  _customSearchError = "";
 
   static get styles() {
     return style;
@@ -285,6 +298,70 @@ export class App extends LitElement {
   }
 
   /**
+   * Handle custom Tenor search input change
+   */
+  _handleCustomSearchInput(e) {
+    this._customSearchQuery = e.target.value;
+  }
+
+  /**
+   * Handle custom Tenor search submission
+   */
+  async _handleCustomSearch() {
+    const query = this._customSearchQuery.trim();
+    if (!query) return;
+
+    this._customSearchLoading = true;
+    this._customSearchError = "";
+    this._customSearchResults = [];
+
+    try {
+      const response = await searchGifs(query, 10);
+      
+      this._customSearchResults = (response.results || []).map((result) => ({
+        id: `tenor_custom_${result.id}`,
+        source: "tenor",
+        preview_url: getTenorPreviewUrl(result),
+        full_url: getGifUrl(result),
+        metadata: {
+          id: result.id,
+          title: result.title || "",
+          hasAudio: result.hasaudio || false,
+        },
+        add_to_canvas_action: {
+          type: "add_gif",
+          asset_id: result.id,
+          source: "tenor",
+        },
+        _original: result,
+      }));
+    } catch (error) {
+      console.error("Custom Tenor search error:", error);
+      this._customSearchError = "Failed to search. Please try again.";
+    } finally {
+      this._customSearchLoading = false;
+    }
+  }
+
+  /**
+   * Handle Enter key press in custom search input
+   */
+  _handleCustomSearchKeypress(e) {
+    if (e.key === "Enter") {
+      this._handleCustomSearch();
+    }
+  }
+
+  /**
+   * Clear custom search results
+   */
+  _clearCustomSearch() {
+    this._customSearchQuery = "";
+    this._customSearchResults = [];
+    this._customSearchError = "";
+  }
+
+  /**
    * Insert asset to canvas based on type
    */
   async _handleInsertAsset(asset) {
@@ -468,6 +545,79 @@ export class App extends LitElement {
   }
 
   /**
+   * Render custom GIF search card
+   */
+  _renderCustomSearchCard() {
+    const hasResults = this._customSearchResults.length > 0;
+
+    return html`
+      <div class="custom-search-card">
+        <div class="card-header">
+          <span class="card-icon">🔍</span>
+          <h4 class="card-title">Search GIFs & Memes</h4>
+        </div>
+        <p class="card-reason">
+          Looking for something specific? Search our library directly.
+        </p>
+
+        <div class="search-input-container">
+          <input
+            type="text"
+            class="custom-search-input"
+            placeholder="Try 'happy dance', 'thumbs up', 'excited'..."
+            .value=${this._customSearchQuery}
+            @input=${this._handleCustomSearchInput}
+            @keypress=${this._handleCustomSearchKeypress}
+            ?disabled=${this._customSearchLoading}
+          />
+          <button
+            class="custom-search-btn"
+            @click=${this._handleCustomSearch}
+            ?disabled=${this._customSearchLoading || !this._customSearchQuery.trim()}
+          >
+            ${this._customSearchLoading ? "..." : "Search"}
+          </button>
+        </div>
+
+        ${this._customSearchError
+          ? html`<div class="custom-search-error">${this._customSearchError}</div>`
+          : ""}
+
+        ${hasResults
+          ? html`
+              <div class="custom-search-results">
+                <div class="mini-gallery">
+                  ${this._customSearchResults.map(
+                    (item) => html`
+                      <div class="gallery-item">
+                        <img
+                          src="${item.preview_url}"
+                          alt="Preview"
+                          class="gallery-thumbnail"
+                          loading="lazy"
+                        />
+                        <button
+                          class="add-btn"
+                          @click=${() => this._handleInsertAsset(item)}
+                          ?disabled=${this._insertingAssetId !== null}
+                        >
+                          ${this._insertingAssetId === item.id ? "..." : "+"}
+                        </button>
+                      </div>
+                    `
+                  )}
+                </div>
+                <button class="clear-search-btn" @click=${this._clearCustomSearch}>
+                  Clear Results
+                </button>
+              </div>
+            `
+          : ""}
+      </div>
+    `;
+  }
+
+  /**
    * Render suggestions view (main panel with all suggestion cards)
    */
   _renderSuggestionsView() {
@@ -494,6 +644,7 @@ export class App extends LitElement {
           ${this._enrichedSuggestions.map((suggestion) =>
             this._renderSuggestionCard(suggestion)
           )}
+          ${this._renderCustomSearchCard()}
         </div>
 
         <button class="rescan-btn" @click=${this._handleScanFromCanvas}>
