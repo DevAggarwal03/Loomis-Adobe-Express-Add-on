@@ -9,11 +9,11 @@
  * 4. Add: TENOR_API_KEY=your_api_key_here
  */
 
-const TENOR_API_KEY = process.env.TENOR_API_KEY || "";
+const TENOR_API_KEY = "AIzaSyAFFGjQR7cyu_7rxId7cT8jkU0hJy7F2k0" || process.env.TENOR_API_KEY || "";
 const TENOR_BASE_URL = "https://tenor.googleapis.com/v2";
 const CLIENT_KEY = "meme_machine_addon";
 
-if (TENOR_API_KEY.length === 0) {
+if (!TENOR_API_KEY) {
   console.warn(
     "TENOR_API_KEY is not set. Please create a .env file with TENOR_API_KEY=your_key"
   );

@@ -2,15 +2,15 @@ import { GoogleGenAI } from "@google/genai";
 
 export async function performOCR(base64Image, mimeType) {
   // Check if API key is available
-  const apiKey = process.env.GEMINI_API_KEY || "";
-  console.log("apiKey", apiKey);
-  if (apiKey.length === 0) {
-    throw new Error(
-      "Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file."
-    );
-  }
+  // const apiKey = "AIzaSyANzVUOBx9vMQYNjl7j_KO65J6Y5hzZ9JA";
+  // console.log("apiKey", apiKey);
+  // if (!apiKey) {
+  //   throw new Error(
+  //     "Gemini API key is not configured. Please set GEMINI_API_KEY in your .env file."
+  //   );
+  // }
 
-  const ai = new GoogleGenAI({ apiKey });
+  const ai = new GoogleGenAI({ apiKey: "AIzaSyANzVUOBx9vMQYNjl7j_KO65J6Y5hzZ9JA" });
 
   // Remove data URI prefix if present
   const base64Data = base64Image.includes(",")
