@@ -1,6 +1,5 @@
 # Loomis
-
-<img width="1311" height="734" alt="Loomis Screenshot" src="https://github.com/user-attachments/assets/8a965bb0-f35c-488b-a48f-d48e9ce6024c" />
+<img width="1004" height="297" alt="Screenshot 2026-01-17 at 10 40 42 AM" src="https://github.com/user-attachments/assets/63402f65-d3d2-43b8-b6db-6e9bab3951d4" />
 
 **Loomis** is an AI-powered Adobe Express add-on that analyzes your designs and provides intelligent, segmented suggestions for backgrounds, GIFs, memes, illustrations, and images. Simply scan your canvas or upload an image, and Loomis will suggest relevant assets that enhance your design.
 
