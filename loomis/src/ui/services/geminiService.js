@@ -17,7 +17,7 @@ export async function analyzeDesignV5(base64Image, mimeType, userContext = null)
   //   );
   // }
 
-  const ai = new GoogleGenAI({ apiKey: "AIzaSyAhqZp8MWfYBh8dCcvFXj-StKo_LY0S1DM" });
+  const ai = new GoogleGenAI({ apiKey: "AIzaSyBYOyOtECNmj98NOO81nrZ0woAwvEPR_nE" });
 
   // Remove data URI prefix if present
   const base64Data = base64Image.includes(",")

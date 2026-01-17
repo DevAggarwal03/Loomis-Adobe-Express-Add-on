@@ -17,7 +17,8 @@
  * Guidelines: https://unsplash.com/documentation#guidelines--crediting
  */
 
-const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY || "8Lw0yiQbEcscuzHgmCBFsWolYrxOUrkY4M6fNPEf4l0";
+const UNSPLASH_ACCESS_KEY =
+  process.env.UNSPLASH_ACCESS_KEY || "8D-ucwm4TdkVPfnXd7Gj47KMRARPeiLUXO1Jjyy_DeE";
 const UNSPLASH_BASE_URL = "https://api.unsplash.com";
 const API_VERSION = "v1";
 
